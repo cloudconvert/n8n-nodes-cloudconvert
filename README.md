@@ -18,6 +18,14 @@ CloudConvert is an online file conversion and processing API which allows to con
 
 Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
+1. Go to **Settings > Community Nodes**.
+2. Select **Install**.
+3. Enter `n8n-nodes-cloudconvert` in **Enter npm package name**.
+4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes: select **I understand the risks of installing unverified code from a public source**.
+5. Select **Install**.
+
+After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
+
 ## Operations
 
 It supports these operations:
