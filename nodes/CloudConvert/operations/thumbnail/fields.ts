@@ -1,4 +1,4 @@
-import { INodeProperties } from "n8n-workflow";
+import type { INodeProperties } from 'n8n-workflow';
 
 export const thumbnailFields: INodeProperties[] = [
 	{
@@ -53,5 +53,5 @@ export const thumbnailFields: INodeProperties[] = [
 		},
 		description:
 			'Sets the mode of resizing the image. "Max" resizes the image to fit within the width and height, but will not increase the size of the image if it is smaller than width or height. "Crop" resizes the image to fill the width and height dimensions and crops any excess image data. "Scale" enforces the image width and height by scaling.',
-	}
-]
+	},
+];

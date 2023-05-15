@@ -1,4 +1,4 @@
-import { INodeProperties } from "n8n-workflow";
+import type { INodeProperties } from 'n8n-workflow';
 
 export const captureWebsiteFields: INodeProperties[] = [
 	{
@@ -13,5 +13,5 @@ export const captureWebsiteFields: INodeProperties[] = [
 		},
 		placeholder: 'https://...',
 		description: 'The URL of the website',
-	}
-]
+	},
+];

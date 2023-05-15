@@ -1,5 +1,6 @@
-import { IExecuteFunctions, INodeExecutionData, NodeOperationError } from 'n8n-workflow';
-import { CreateTasksPayload } from '../../Interfaces';
+import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
+import type { CreateTasksPayload } from '../../Interfaces';
 import merge from 'lodash.merge';
 import {
 	createJob,
@@ -15,7 +16,7 @@ export async function executeWatermark(this: IExecuteFunctions): Promise<INodeEx
 	const returnData = [];
 
 	for (let i = 0; i < items.length; i++) {
-		let tasks: CreateTasksPayload = {
+		const tasks: CreateTasksPayload = {
 			'n8n-upload': {
 				operation: 'import/upload',
 			},
@@ -29,14 +30,14 @@ export async function executeWatermark(this: IExecuteFunctions): Promise<INodeEx
 			},
 		};
 
-		if(this.getNodeParameter('useWatermarkImage', i, false)) {
+		if (this.getNodeParameter('useWatermarkImage', i, false)) {
 			tasks['n8n-watermark-image'] = {
 				operation: 'import/url',
-				url: this.getNodeParameter('imageUrl', i)
+				url: this.getNodeParameter('imageUrl', i),
 			};
 			tasks['n8n-process'].image = 'n8n-watermark-image';
 		}
-		for (let option of [
+		for (const option of [
 			'text',
 			'font_size',
 			'font_color',
@@ -61,7 +62,7 @@ export async function executeWatermark(this: IExecuteFunctions): Promise<INodeEx
 			tasks['n8n-process'] = merge(tasks['n8n-process'], additionalOptions);
 		}
 
-		let createdJob = await createJob.call(this, tasks);
+		const createdJob = await createJob.call(this, tasks);
 
 		const uploadTask = getJobUploadTask(createdJob);
 
@@ -69,13 +70,13 @@ export async function executeWatermark(this: IExecuteFunctions): Promise<INodeEx
 			await uploadInputFile.call(this, uploadTask, i);
 		}
 
-		let completedJob = await waitForJob.call(this, createdJob.id);
+		const completedJob = await waitForJob.call(this, createdJob.id);
 
 		// download output files
 
-		let exportUrls = getJobExportUrls(completedJob); // multiple output files possible, e.g. converting a multi page PDF to PNG
+		const exportUrls = getJobExportUrls(completedJob); // multiple output files possible, e.g. converting a multi page PDF to PNG
 
-		for (let exportUrl of exportUrls) {
+		for (const exportUrl of exportUrls) {
 			returnData.push({
 				json: {},
 				binary: {

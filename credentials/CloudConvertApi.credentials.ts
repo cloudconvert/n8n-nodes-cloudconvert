@@ -1,4 +1,4 @@
-import {
+import type {
 	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
@@ -7,13 +7,17 @@ import {
 
 export class CloudConvertApi implements ICredentialType {
 	name = 'cloudConvertApi';
+
 	displayName = 'CloudConvert API';
+
 	documentationUrl = 'https://cloudconvert.com/dashboard/api/v2/keys';
+
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
 			name: 'apiKey',
-			description: 'The API Key can be generated on your dashboard. The n8n nodes requires the "user.read", "task.read" and "task.write" scopes.',
+			description:
+				'The API Key can be generated on your dashboard. The n8n nodes requires the "user.read", "task.read" and "task.write" scopes.',
 			type: 'string',
 			typeOptions: { password: true },
 			default: '',

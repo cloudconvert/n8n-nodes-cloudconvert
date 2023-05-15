@@ -1,5 +1,6 @@
-import { IExecuteFunctions, INodeExecutionData, NodeOperationError } from 'n8n-workflow';
-import { CreateTasksPayload } from '../../Interfaces';
+import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
+import type { CreateTasksPayload } from '../../Interfaces';
 import merge from 'lodash.merge';
 import {
 	createJob,
@@ -15,13 +16,13 @@ export async function executeOptimize(this: IExecuteFunctions): Promise<INodeExe
 	const returnData = [];
 
 	for (let i = 0; i < items.length; i++) {
-		let tasks: CreateTasksPayload = {
+		const tasks: CreateTasksPayload = {
 			'n8n-upload': {
 				operation: 'import/upload',
 			},
 			'n8n-process': {
 				input: 'n8n-upload',
-				operation: 'optimize'
+				operation: 'optimize',
 			},
 			'n8n-export': {
 				input: 'n8n-process',
@@ -39,7 +40,7 @@ export async function executeOptimize(this: IExecuteFunctions): Promise<INodeExe
 			tasks['n8n-process'] = merge(tasks['n8n-process'], additionalOptions);
 		}
 
-		let createdJob = await createJob.call(this, tasks);
+		const createdJob = await createJob.call(this, tasks);
 
 		const uploadTask = getJobUploadTask(createdJob);
 
@@ -47,11 +48,11 @@ export async function executeOptimize(this: IExecuteFunctions): Promise<INodeExe
 			await uploadInputFile.call(this, uploadTask, i);
 		}
 
-		let completedJob = await waitForJob.call(this, createdJob.id);
+		const completedJob = await waitForJob.call(this, createdJob.id);
 
-		let exportUrls = getJobExportUrls(completedJob);
+		const exportUrls = getJobExportUrls(completedJob);
 
-		for (let exportUrl of exportUrls) {
+		for (const exportUrl of exportUrls) {
 			returnData.push({
 				json: {},
 				binary: {

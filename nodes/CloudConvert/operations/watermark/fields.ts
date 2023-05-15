@@ -1,4 +1,4 @@
-import { INodeProperties } from "n8n-workflow";
+import type { INodeProperties } from 'n8n-workflow';
 
 export const watermarkFields: INodeProperties[] = [
 	{
@@ -159,5 +159,5 @@ export const watermarkFields: INodeProperties[] = [
 		placeholder: '',
 		description:
 			'Opacity in % to make the watermark transparent. A value of 100 means it is fully visible.',
-	}
-]
+	},
+];

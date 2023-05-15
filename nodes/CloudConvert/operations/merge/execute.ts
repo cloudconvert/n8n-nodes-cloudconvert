@@ -1,5 +1,5 @@
-import { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
-import { CreateTasksPayload } from '../../Interfaces';
+import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
+import type { CreateTasksPayload } from '../../Interfaces';
 import {
 	createJob,
 	downloadOutputFile,
@@ -14,10 +14,10 @@ export async function executeMerge(this: IExecuteFunctions): Promise<INodeExecut
 	const returnData = [];
 
 	// Create one job to merge all input items
-	let tasks: CreateTasksPayload = {};
+	const tasks: CreateTasksPayload = {};
 
 	for (let i = 0; i < items.length; i++) {
-		tasks['n8n-upload-' + i] = {
+		tasks['n8n-upload-' + i.toString()] = {
 			operation: 'import/upload',
 		};
 	}
@@ -33,7 +33,7 @@ export async function executeMerge(this: IExecuteFunctions): Promise<INodeExecut
 		operation: 'export/url',
 	};
 
-	let createdJob = await createJob.call(this, tasks);
+	const createdJob = await createJob.call(this, tasks);
 
 	for (let i = 0; i < items.length; i++) {
 		const uploadTask = getJobUploadTask(createdJob, i);
@@ -42,9 +42,9 @@ export async function executeMerge(this: IExecuteFunctions): Promise<INodeExecut
 		}
 	}
 
-	let completedJob = await waitForJob.call(this, createdJob.id);
+	const completedJob = await waitForJob.call(this, createdJob.id);
 
-	let exportUrl = getJobExportUrls(completedJob)[0]; // merge always results in one output file
+	const exportUrl = getJobExportUrls(completedJob)[0]; // merge always results in one output file
 
 	returnData.push({
 		json: {},
