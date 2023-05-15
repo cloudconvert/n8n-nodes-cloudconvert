@@ -20,7 +20,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 1. Go to **Settings > Community Nodes**.
 2. Select **Install**.
-3. Enter `n8n-nodes-cloudconvert` in **Enter npm package name**.
+3. Enter `@cloudconvert/n8n-nodes-cloudconvert` in **Enter npm package name**.
 4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes: select **I understand the risks of installing unverified code from a public source**.
 5. Select **Install**.
 
@@ -47,7 +47,7 @@ Create a free CloudConvert account [here](https://cloudconvert.com/register) whi
 
 ## Compatibility
 
-Tested against n8n version 0.226+.
+Tested against n8n version 0.225+.
 
 ## Usage
 
