@@ -1,7 +1,7 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import type { CreateTasksPayload } from '../../Interfaces';
-import merge from 'lodash.merge';
+import { mergeObjects } from '../../Utils';
 import { createJob, downloadOutputFile, getJobExportUrls, waitForJob } from '../../Utils';
 
 export async function executeCaptureWebsite(
@@ -30,7 +30,7 @@ export async function executeCaptureWebsite(
 			} catch (exception) {
 				throw new NodeOperationError(this.getNode(), 'Additional Options must be a valid JSON');
 			}
-			tasks['n8n-process'] = merge(tasks['n8n-process'], additionalOptions);
+			tasks['n8n-process'] = mergeObjects(tasks['n8n-process'], additionalOptions as any);
 		}
 
 		const createdJob = await createJob.call(this, tasks);

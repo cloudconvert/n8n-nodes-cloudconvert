@@ -1,6 +1,5 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
-import FormData from 'form-data';
 import type { Readable } from 'stream';
 import type { CreateTasksPayload, Job, Task, TaskResultFile } from './Interfaces';
 
@@ -37,42 +36,36 @@ export async function createJob(this: IExecuteFunctions, tasks: CreateTasksPaylo
 }
 
 export async function uploadInputFile(this: IExecuteFunctions, uploadTask: Task, itemIndex = 0) {
-	const formData = new FormData();
+	// Use native FormData and Blob (from Node's undici) instead of 'form-data' package
+	const FormDataCtor = (globalThis as any).FormData;
+	const BlobCtor = (globalThis as any).Blob;
+	const formData = new FormDataCtor();
 
-	for (const parameter in uploadTask.result?.form?.parameters || []) {
+	for (const parameter in (uploadTask.result?.form?.parameters as Record<string, string>) || {}) {
 		formData.append(parameter, uploadTask.result!.form!.parameters[parameter]);
 	}
 
 	if (this.getNodeParameter('inputBinaryData', itemIndex)) {
-		const binaryPropertyName = this.getNodeParameter(
-			'inputBinaryPropertyName',
-			itemIndex,
-		) as string;
+		const binaryPropertyName = this.getNodeParameter('inputBinaryPropertyName', itemIndex) as string;
 		const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
 		const buffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
 		if (!binaryData.fileName)
 			throw new NodeOperationError(this.getNode(), 'No file name given for input file.');
 
-		formData.append('file', buffer, {
-			contentType: binaryData.mimeType,
-			filename: binaryData.fileName,
-		});
+		const blob = new BlobCtor([buffer], { type: binaryData.mimeType || undefined });
+		formData.append('file', blob, binaryData.fileName);
 	} else {
-		formData.append('file', this.getNodeParameter('inputFileContent', itemIndex), {
-			contentType: 'text/plain',
-			filename: this.getNodeParameter('inputFilename', itemIndex) as string,
-		});
+		const content = this.getNodeParameter('inputFileContent', itemIndex) as string;
+		const filename = this.getNodeParameter('inputFilename', itemIndex) as string;
+		const blob = new BlobCtor([content], { type: 'text/plain' });
+		formData.append('file', blob, filename);
 	}
 
 	await this.helpers.httpRequest({
 		method: 'POST',
 		url: uploadTask.result!.form!.url,
-		body: formData,
-
-		headers: {
-			...formData.getHeaders(),
-		},
-	});
+		body: formData as unknown as any,
+	} as unknown as any);
 }
 
 export function getJobErrorMessage(job: Job): string {
@@ -132,4 +125,29 @@ export function getJobExportUrls(job: Job): TaskResultFile[] {
 	return job.tasks
 		.filter((task) => task.operation === 'export/url' && task.status === 'finished')
 		.flatMap((task) => task.result?.files ?? []);
+}
+
+// Simple deep merge to replace lodash.merge
+export function mergeObjects<T extends Record<string, any>, U extends Record<string, any>>(
+	target: T,
+	source: U,
+): T & U {
+	const output: Record<string, any> = { ...target };
+	for (const key of Object.keys(source)) {
+		const sourceValue = (source as Record<string, any>)[key];
+		const targetValue = (output as Record<string, any>)[key];
+		if (
+			sourceValue &&
+			typeof sourceValue === 'object' &&
+			!Array.isArray(sourceValue) &&
+			targetValue &&
+			typeof targetValue === 'object' &&
+			!Array.isArray(targetValue)
+		) {
+			(output as Record<string, any>)[key] = mergeObjects(targetValue, sourceValue);
+		} else {
+			(output as Record<string, any>)[key] = sourceValue;
+		}
+	}
+	return output as T & U;
 }

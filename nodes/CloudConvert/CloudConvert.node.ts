@@ -1,6 +1,5 @@
 import type { IExecuteFunctions } from 'n8n-core';
-import keys from 'lodash.keys';
-import keyBy from 'lodash.keyby';
+// Replaces lodash.keys and lodash.keyBy with native implementations to satisfy n8n restrictions
 
 import type {
 	ILoadOptionsFunctions,
@@ -299,7 +298,11 @@ export class CloudConvert implements INodeType {
 					url: `https://api.cloudconvert.com/v2/operations?filter[operation]=${operation}`,
 				});
 
-				for (const outputFormat of keys(keyBy(data, 'output_format'))) {
+				// Create a set of unique output formats using native methods
+				const uniqueFormats = Array.from(
+					new Set((data as Array<{ output_format?: string }>).map((item) => item.output_format || '')),
+				);
+				for (const outputFormat of uniqueFormats) {
 					returnData.push({
 						name: outputFormat,
 						value: outputFormat,
