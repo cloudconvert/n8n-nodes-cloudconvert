@@ -1,6 +1,6 @@
 {
   "name": "@cloudconvert/n8n-nodes-cloudconvert",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "n8n node for CloudConvert - an online file conversion and processing API which allows to convert files, create thumbnails, merge files, add watermarks and more!",
   "keywords": [
     "n8n-community-node-package"
