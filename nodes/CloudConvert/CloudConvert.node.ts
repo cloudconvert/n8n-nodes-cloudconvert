@@ -1,5 +1,3 @@
-import type { IExecuteFunctions } from 'n8n-core';
-// Replaces lodash.keys and lodash.keyBy with native implementations to satisfy n8n restrictions
 
 import type {
 	ILoadOptionsFunctions,
@@ -7,6 +5,7 @@ import type {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	IExecuteFunctions
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 

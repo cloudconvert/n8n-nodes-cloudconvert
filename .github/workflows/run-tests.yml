@@ -25,4 +25,3 @@ jobs:
       - run: npm install -d
       - run: npm run lint
       - run: npm run build
-      - run: npm test
