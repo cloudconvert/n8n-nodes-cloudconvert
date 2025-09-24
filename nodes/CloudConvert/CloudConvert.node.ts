@@ -316,24 +316,37 @@ export class CloudConvert implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const operation = this.getNodeParameter('operation', 0);
 
-		if (operation === 'convert') {
-			return executeConvert.call(this);
-		} else if (operation === 'thumbnail') {
-			return executeThumbnail.call(this);
-		} else if (operation === 'merge') {
-			return executeMerge.call(this);
-		} else if (operation === 'archive') {
-			return executeArchive.call(this);
-		} else if (operation === 'optimize') {
-			return executeOptimize.call(this);
-		} else if (operation === 'watermark') {
-			return executeWatermark.call(this);
-		} else if (operation === 'metadata') {
-			return executeMetadata.call(this);
-		} else if (operation === 'capture-website') {
-			return executeCaptureWebsite.call(this);
-		} else {
-			throw new NodeOperationError(this.getNode(), `Invalid operation ${operation}`);
+		try {
+			if (operation === 'convert') {
+				return await executeConvert.call(this);
+			} else if (operation === 'thumbnail') {
+				return await executeThumbnail.call(this);
+			} else if (operation === 'merge') {
+				return await executeMerge.call(this);
+			} else if (operation === 'archive') {
+				return await executeArchive.call(this);
+			} else if (operation === 'optimize') {
+				return await executeOptimize.call(this);
+			} else if (operation === 'watermark') {
+				return await executeWatermark.call(this);
+			} else if (operation === 'metadata') {
+				return await executeMetadata.call(this);
+			} else if (operation === 'capture-website') {
+				return await executeCaptureWebsite.call(this);
+			} else {
+				throw new NodeOperationError(this.getNode(), `Invalid operation ${operation}`);
+			}
+		} catch (error) {
+			if (this.continueOnFail()) {
+				return this.prepareOutputData([
+					{
+						json: {
+							error: error.message,
+						},
+					},
+				]);
+			}
+			throw error;
 		}
 	}
 }
