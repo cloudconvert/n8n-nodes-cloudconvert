@@ -37,6 +37,7 @@ export class CloudConvert implements INodeType {
 		},
 		inputs: ['main'],
 		outputs: ['main'],
+		usableAsTool: true,
 		/**
 		 * Auth
 		 */
