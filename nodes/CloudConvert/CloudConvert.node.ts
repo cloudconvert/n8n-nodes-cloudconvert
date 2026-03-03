@@ -1,11 +1,10 @@
-
 import type {
 	ILoadOptionsFunctions,
 	INodeExecutionData,
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
-	IExecuteFunctions
+	IExecuteFunctions,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
@@ -20,6 +19,10 @@ import { executeWatermark } from './operations/watermark/execute';
 import { executeMetadata } from './operations/metadata/execute';
 import { executeCaptureWebsite } from './operations/capture-website/execute';
 import { captureWebsiteFields } from './operations/capture-website/fields';
+import { executePdfOperation } from './operations/pdf/execute';
+import { pdfFields } from './operations/pdf/fields';
+import { executeCommand } from './operations/command/execute';
+import { commandFields } from './operations/command/fields';
 
 export class CloudConvert implements INodeType {
 	description: INodeTypeDescription = {
@@ -78,26 +81,56 @@ export class CloudConvert implements INodeType {
 				],
 				default: 'oAuth2',
 			},
+			/*
+			 * Resources
+			 */
+			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{
+						name: 'Command',
+						value: 'command',
+					},
+					{
+						name: 'File',
+						value: 'file',
+					},
+					{
+						name: 'Metadata',
+						value: 'metadata',
+					},
+					{
+						name: 'PDF',
+						value: 'pdf',
+					},
+					{
+						name: 'Website',
+						value: 'website',
+					}
+				],
+				default: 'file',
+			},
 			/**
-			 * Operations
+			 * File Operations
 			 */
 			{
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['file'],
+					},
+				},
 				options: [
 					{
 						name: 'Add Watermark',
 						value: 'watermark',
 						description: 'Add a watermark to a PDF file, to an image or to a video',
 						action: 'Add watermark to a file',
-					},
-					{
-						name: 'Capture Website',
-						value: 'capture-website',
-						description:
-							'Creates job to capture a website as PDF or create a website screenshot as JPG or PNG',
-						action: 'Capture website',
 					},
 					{
 						name: 'Convert File',
@@ -118,18 +151,6 @@ export class CloudConvert implements INodeType {
 						action: 'Create a thumbnail',
 					},
 					{
-						name: 'Get Metadata',
-						value: 'metadata',
-						description: 'Extract metadata from files',
-						action: 'Get metadata from a file',
-					},
-					{
-						name: 'Merge Files',
-						value: 'merge',
-						description: 'Merge multiple files into a single PDF',
-						action: 'Merge files to PDF',
-					},
-					{
 						name: 'Optimize File',
 						value: 'optimize',
 						description: 'Optimize / compress a file to reduce its size',
@@ -137,6 +158,149 @@ export class CloudConvert implements INodeType {
 					},
 				],
 				default: 'convert',
+				noDataExpression: true,
+			},
+			/**
+			 * Metadata Operations
+			 */
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['metadata'],
+					},
+				},
+				options: [
+					{
+						name: 'Get Metadata',
+						value: 'metadata',
+						description: 'Extract metadata from files',
+						action: 'Get metadata from a file',
+					},
+					{
+						name: 'Write Metadata',
+						value: 'metadata/write',
+						description: 'Write metadata to files',
+						action: 'Write metadata to a file',
+					},
+				],
+				default: 'metadata',
+				noDataExpression: true,
+			},
+
+			/**
+			 * PDF Operations
+			 */
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['pdf'],
+					},
+				},
+				options: [
+					{
+						name: 'Add PDF OCR Layer',
+						value: 'pdf/ocr',
+						description: 'Add an OCR text layer to scanned PDF files',
+						action: 'Add OCR layer to PDF',
+					},
+					{
+						name: 'Convert PDF to PDF/A',
+						value: 'pdf/a',
+						description: 'Convert a PDF file to PDF/A-1B, PDF/A-2B or PDF/A-3B',
+						action: 'Convert PDF to PDF/A',
+					},
+					{
+						name: 'Decrypt PDF',
+						value: 'pdf/decrypt',
+						description: 'Decrypt a password-protected PDF file',
+						action: 'Decrypt PDF',
+					},
+					{
+						name: 'Encrypt PDF',
+						value: 'pdf/encrypt',
+						description: 'Encrypt a PDF file and optionally set a password and restrictions',
+						action: 'Encrypt PDF',
+					},
+					{
+						name: 'Extract Pages From PDF',
+						value: 'pdf/extract-pages',
+						description: 'Extract specific pages or page ranges from a PDF file',
+						action: 'Extract pages from PDF',
+					},
+					{
+						name: 'Merge Files',
+						value: 'pdf/merge',
+						description: 'Merge multiple files into a single PDF',
+						action: 'Merge files to PDF',
+					},
+					{
+						name: 'Rotate PDF Pages',
+						value: 'pdf/rotate-pages',
+						description: 'Rotate single pages or all pages of a PDF file',
+						action: 'Rotate PDF pages',
+					},
+					{
+						name: 'Split PDF Into Pages',
+						value: 'pdf/split-pages',
+						description: 'Split a PDF into one PDF file per page',
+						action: 'Split PDF into pages',
+					},
+				],
+				default: 'pdf/a',
+				noDataExpression: true,
+			},
+			/**
+			 * Command Operations
+			 */
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['command'],
+					},
+				},
+				options: [
+					{
+						name: 'Execute Command',
+						value: 'command',
+						description:
+							'Execute a custom ffmpeg, ImageMagick or GraphicsMagick command on the input file',
+						action: 'Execute command',
+					},
+				],
+				default: 'command',
+				noDataExpression: true,
+			},
+			/**
+			 * Website Operations
+			 */
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['website'],
+					},
+				},
+				options: [
+					{
+						name: 'Capture Website',
+						value: 'capture-website',
+						description:
+							'Creates job to capture a website as PDF or create a website screenshot as JPG or PNG',
+						action: 'Capture website',
+					}
+				],
+				default: 'capture-website',
 				noDataExpression: true,
 			},
 			{
@@ -176,14 +340,23 @@ export class CloudConvert implements INodeType {
 							'thumbnail',
 							'optimize',
 							'metadata',
+							'metadata/write',
 							'watermark',
+							'command',
+							'pdf/a',
+							'pdf/ocr',
+							'pdf/encrypt',
+							'pdf/decrypt',
+							'pdf/split-pages',
+							'pdf/extract-pages',
+							'pdf/rotate-pages',
 						],
 					},
 				},
 				description: 'Whether the input file to upload should be taken from binary field',
 			},
 			{
-				displayName: 'Input File Content',
+				displayName: 'Input File Contents',
 				name: 'inputFileContent',
 				type: 'string',
 				default: '',
@@ -197,7 +370,16 @@ export class CloudConvert implements INodeType {
 							'thumbnail',
 							'optimize',
 							'metadata',
+							'metadata/write',
 							'watermark',
+							'command',
+							'pdf/a',
+							'pdf/ocr',
+							'pdf/encrypt',
+							'pdf/decrypt',
+							'pdf/split-pages',
+							'pdf/extract-pages',
+							'pdf/rotate-pages',
 						],
 						inputBinaryData: [false],
 					},
@@ -206,7 +388,7 @@ export class CloudConvert implements INodeType {
 				description: 'The text content of the file to upload',
 			},
 			{
-				displayName: 'Input Filename',
+				displayName: 'Input File Name',
 				name: 'inputFilename',
 				type: 'string',
 				default: '',
@@ -220,7 +402,9 @@ export class CloudConvert implements INodeType {
 							'thumbnail',
 							'optimize',
 							'metadata',
+							'metadata/write',
 							'watermark',
+							'command',
 						],
 						inputBinaryData: [false],
 					},
@@ -243,7 +427,16 @@ export class CloudConvert implements INodeType {
 							'thumbnail',
 							'optimize',
 							'metadata',
+							'metadata/write',
 							'watermark',
+							'command',
+							'pdf/a',
+							'pdf/ocr',
+							'pdf/encrypt',
+							'pdf/decrypt',
+							'pdf/split-pages',
+							'pdf/extract-pages',
+							'pdf/rotate-pages',
 						],
 						inputBinaryData: [true],
 					},
@@ -259,6 +452,27 @@ export class CloudConvert implements INodeType {
 			...captureWebsiteFields,
 			...thumbnailFields,
 			...watermarkFields,
+			...pdfFields,
+			...commandFields,
+
+			/**
+			 * Metadata specific options
+			 */
+			{
+				displayName: 'Metadata',
+				name: 'metadata',
+				type: 'json',
+				default: '',
+				displayOptions: {
+					show: {
+						resource: ['metadata'],
+						operation: ['metadata/write'],
+					},
+				},
+				placeholder: '{ "Author": "Jane Doe", "Title": "My Document" }',
+				description:
+					'JSON dictionary of metadata keys and values to write, for example Title, Author, Creator, Producer',
+			},
 
 			/**
 			 * General additional options
@@ -274,9 +488,9 @@ export class CloudConvert implements INodeType {
 							'convert',
 							'thumbnail',
 							'optimize',
-							'metadata',
 							'watermark',
 							'capture-website',
+							'command',
 						],
 					},
 				},
@@ -300,7 +514,9 @@ export class CloudConvert implements INodeType {
 
 				// Create a set of unique output formats using native methods
 				const uniqueFormats = Array.from(
-					new Set((data as Array<{ output_format?: string }>).map((item) => item.output_format || '')),
+					new Set(
+						(data as Array<{ output_format?: string }>).map((item) => item.output_format || ''),
+					),
 				);
 				for (const outputFormat of uniqueFormats) {
 					returnData.push({
@@ -329,10 +545,22 @@ export class CloudConvert implements INodeType {
 				return await executeOptimize.call(this);
 			} else if (operation === 'watermark') {
 				return await executeWatermark.call(this);
-			} else if (operation === 'metadata') {
+			} else if (operation === 'metadata' || operation === 'metadata/write') {
 				return await executeMetadata.call(this);
 			} else if (operation === 'capture-website') {
 				return await executeCaptureWebsite.call(this);
+			} else if (operation === 'command') {
+				return await executeCommand.call(this);
+			} else if (
+				operation === 'pdf/a' ||
+				operation === 'pdf/ocr' ||
+				operation === 'pdf/encrypt' ||
+				operation === 'pdf/decrypt' ||
+				operation === 'pdf/split-pages' ||
+				operation === 'pdf/extract-pages' ||
+				operation === 'pdf/rotate-pages'
+			) {
+				return await executePdfOperation.call(this);
 			} else {
 				throw new NodeOperationError(this.getNode(), `Invalid operation ${operation}`);
 			}
