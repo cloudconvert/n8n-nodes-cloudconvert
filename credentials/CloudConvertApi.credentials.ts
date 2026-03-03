@@ -36,7 +36,7 @@ export class CloudConvertApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://api.cloudconvert.com/v2',
-			url: '/me',
+			url: '/users/me',
 		},
 	};
 }
