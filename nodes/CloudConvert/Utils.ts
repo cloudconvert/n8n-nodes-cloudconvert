@@ -37,9 +37,7 @@ export async function createJob(this: IExecuteFunctions, tasks: CreateTasksPaylo
 
 export async function uploadInputFile(this: IExecuteFunctions, uploadTask: Task, itemIndex = 0) {
 	// Use native FormData and Blob (from Node's undici) instead of 'form-data' package
-	const FormDataCtor = (globalThis as any).FormData;
-	const BlobCtor = (globalThis as any).Blob;
-	const formData = new FormDataCtor();
+	const formData = new FormData();
 
 	for (const parameter in (uploadTask.result?.form?.parameters as Record<string, string>) || {}) {
 		formData.append(parameter, uploadTask.result!.form!.parameters[parameter]);
@@ -52,12 +50,12 @@ export async function uploadInputFile(this: IExecuteFunctions, uploadTask: Task,
 		if (!binaryData.fileName)
 			throw new NodeOperationError(this.getNode(), 'No file name given for input file.');
 
-		const blob = new BlobCtor([buffer], { type: binaryData.mimeType || undefined });
+		const blob = new Blob([buffer], { type: binaryData.mimeType || undefined });
 		formData.append('file', blob, binaryData.fileName);
 	} else {
 		const content = this.getNodeParameter('inputFileContent', itemIndex) as string;
 		const filename = this.getNodeParameter('inputFilename', itemIndex) as string;
-		const blob = new BlobCtor([content], { type: 'text/plain' });
+		const blob = new Blob([content], { type: 'text/plain' });
 		formData.append('file', blob, filename);
 	}
 

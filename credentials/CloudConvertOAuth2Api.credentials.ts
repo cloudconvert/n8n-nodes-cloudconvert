@@ -1,4 +1,4 @@
-import type { ICredentialType, INodeProperties } from 'n8n-workflow';
+import type { ICredentialType, INodeProperties, Icon } from 'n8n-workflow';
 
 const scopes = ['user.read', 'task.read', 'task.write'];
 
@@ -10,6 +10,8 @@ export class CloudConvertOAuth2Api implements ICredentialType {
 	displayName = 'CloudConvert OAuth2 API';
 
 	documentationUrl = 'https://cloudconvert.com/api/v2#authentication';
+
+	icon: Icon = { light: 'file:../nodes/CloudConvert/cloudconvert.svg', dark: 'file:../nodes/CloudConvert/cloudconvert_dark.svg' };
 
 	properties: INodeProperties[] = [
 		{

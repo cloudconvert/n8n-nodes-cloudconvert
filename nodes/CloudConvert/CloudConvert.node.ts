@@ -29,7 +29,7 @@ export class CloudConvert implements INodeType {
 		displayName: 'CloudConvert',
 		name: 'cloudConvert',
 		/* eslint-disable n8n-nodes-base/node-class-description-icon-not-svg */
-		icon: 'file:cloudconvert.png',
+		icon: { light: 'file:cloudconvert.svg', dark: 'file:cloudconvert_dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{ $parameter["operation"] }}',
@@ -506,11 +506,18 @@ export class CloudConvert implements INodeType {
 			async loadOutputFormats(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const operation = this.getCurrentNodeParameter('operation') as string;
 				const returnData: INodePropertyOptions[] = [];
-				const { data } = await this.helpers.request({
-					method: 'GET',
-					json: true,
-					url: `https://api.cloudconvert.com/v2/operations?filter[operation]=${operation}`,
-				});
+				const credentialsType =
+					(this.getCurrentNodeParameter('authentication') as string) === 'oAuth2'
+						? 'cloudConvertOAuth2Api'
+						: 'cloudConvertApi';
+				const { data } = await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					credentialsType,
+					{
+						method: 'GET',
+						url: `https://api.cloudconvert.com/v2/operations?filter[operation]=${operation}`,
+					},
+				);
 
 				// Create a set of unique output formats using native methods
 				const uniqueFormats = Array.from(

@@ -3,6 +3,7 @@ import type {
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
+	Icon,
 } from 'n8n-workflow';
 
 export class CloudConvertApi implements ICredentialType {
@@ -12,6 +13,8 @@ export class CloudConvertApi implements ICredentialType {
 
 	documentationUrl = 'https://cloudconvert.com/dashboard/api/v2/keys';
 
+	icon: Icon = { light: 'file:../nodes/CloudConvert/cloudconvert.svg', dark: 'file:../nodes/CloudConvert/cloudconvert_dark.svg' };
+	
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
