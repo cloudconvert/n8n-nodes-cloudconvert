@@ -23,6 +23,7 @@ import { executePdfOperation } from './operations/pdf/execute';
 import { pdfFields } from './operations/pdf/fields';
 import { executeCommand } from './operations/command/execute';
 import { commandFields } from './operations/command/fields';
+import { getBaseUrls } from './Utils';
 
 export class CloudConvert implements INodeType {
 	description: INodeTypeDescription = {
@@ -31,7 +32,9 @@ export class CloudConvert implements INodeType {
 		/* eslint-disable n8n-nodes-base/node-class-description-icon-not-svg */
 		icon: { light: 'file:cloudconvert.svg', dark: 'file:cloudconvert_dark.svg' },
 		group: ['transform'],
-		version: 1,
+		// 1.1: requests go to the credential's base URL instead of a hardcoded host
+		version: [1, 1.1],
+		defaultVersion: 1.1,
 		subtitle: '={{ $parameter["operation"] }}',
 		description:
 			'Use CloudConvert to convert files, create thumbnails, merge files, add watermarks and more!',
@@ -506,16 +509,16 @@ export class CloudConvert implements INodeType {
 			async loadOutputFormats(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const operation = this.getCurrentNodeParameter('operation') as string;
 				const returnData: INodePropertyOptions[] = [];
+				const authentication = this.getCurrentNodeParameter('authentication') as string;
 				const credentialsType =
-					(this.getCurrentNodeParameter('authentication') as string) === 'oAuth2'
-						? 'cloudConvertOAuth2Api'
-						: 'cloudConvertApi';
+					authentication === 'oAuth2' ? 'cloudConvertOAuth2Api' : 'cloudConvertApi';
+				const { baseUrl } = await getBaseUrls.call(this, authentication);
 				const { data } = await this.helpers.httpRequestWithAuthentication.call(
 					this,
 					credentialsType,
 					{
 						method: 'GET',
-						url: `https://api.cloudconvert.com/v2/operations?filter[operation]=${operation}`,
+						url: `${baseUrl}/v2/operations?filter[operation]=${operation}`,
 					},
 				);
 

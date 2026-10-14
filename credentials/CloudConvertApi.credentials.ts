@@ -25,6 +25,18 @@ export class CloudConvertApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: '',
 		},
+		{
+			displayName: 'Base URL',
+			name: 'baseUrl',
+			type: 'hidden',
+			default: 'https://api.cloudconvert.com',
+		},
+		{
+			displayName: 'Sync Base URL',
+			name: 'syncBaseUrl',
+			type: 'hidden',
+			default: 'https://sync.api.cloudconvert.com',
+		},
 	];
 
 	authenticate: IAuthenticateGeneric = {
@@ -38,8 +50,8 @@ export class CloudConvertApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://api.cloudconvert.com/v2',
-			url: '/users/me',
+			baseURL: '={{$credentials.baseUrl}}',
+			url: '/v2/users/me',
 		},
 	};
 }
