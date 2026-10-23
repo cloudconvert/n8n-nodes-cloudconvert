@@ -53,7 +53,8 @@
 #   git tag 1.2.3
 #   git push origin master 1.2.3
 #
-# The tag push triggers this workflow, which lints, builds and publishes to npm.
+# The tag push triggers this workflow, which lints, builds and publishes to npm,
+# then creates a GitHub release for the tag with generated release notes.
 
 name: Publish
 
@@ -100,3 +101,23 @@ jobs:
           npm run release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  github-release:
+    name: Create GitHub release
+    # Only runs once the package is on npm.
+    needs: publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Required to create the release. Kept out of the publish job.
+      contents: write
+
+    steps:
+      - name: Create release
+        # Tags with a pre-release suffix (e.g. 2.0.0-rc.1) are marked as pre-releases.
+        run: |
+          flags=""
+          case "$GITHUB_REF_NAME" in *-*) flags="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes $flags
+        env:
+          GH_TOKEN: ${{ github.token }}
