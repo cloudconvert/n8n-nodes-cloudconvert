@@ -1,13 +1,30 @@
-import type { IExecuteFunctions } from 'n8n-workflow';
+import type { IExecuteFunctions, ILoadOptionsFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import type { Readable } from 'stream';
 import type { CreateTasksPayload, Job, Task, TaskResultFile } from './Interfaces';
 
+const DEFAULT_BASE_URL = 'https://api.cloudconvert.com';
+const DEFAULT_SYNC_BASE_URL = 'https://sync.api.cloudconvert.com';
+
+// Only the API key credential can override the hosts; OAuth2 always uses the defaults
+export async function getBaseUrls(
+	this: IExecuteFunctions | ILoadOptionsFunctions,
+	authentication: string,
+): Promise<{ baseUrl: string; syncBaseUrl: string }> {
+	if (authentication === 'oAuth2') {
+		return { baseUrl: DEFAULT_BASE_URL, syncBaseUrl: DEFAULT_SYNC_BASE_URL };
+	}
+	const credentials = await this.getCredentials('cloudConvertApi');
+	return {
+		baseUrl: ((credentials.baseUrl as string) || DEFAULT_BASE_URL).replace(/\/+$/, ''),
+		syncBaseUrl: ((credentials.syncBaseUrl as string) || DEFAULT_SYNC_BASE_URL).replace(/\/+$/, ''),
+	};
+}
+
 export async function createJob(this: IExecuteFunctions, tasks: CreateTasksPayload): Promise<Job> {
-	const credentialsType =
-		(this.getNodeParameter('authentication', 0) as string) === 'oAuth2'
-			? 'cloudConvertOAuth2Api'
-			: 'cloudConvertApi';
+	const authentication = this.getNodeParameter('authentication', 0) as string;
+	const credentialsType = authentication === 'oAuth2' ? 'cloudConvertOAuth2Api' : 'cloudConvertApi';
+	const { baseUrl } = await getBaseUrls.call(this, authentication);
 	let createResponseData;
 	try {
 		createResponseData = await this.helpers.httpRequestWithAuthentication.call(
@@ -15,7 +32,7 @@ export async function createJob(this: IExecuteFunctions, tasks: CreateTasksPaylo
 			credentialsType,
 			{
 				method: 'POST',
-				url: 'https://api.cloudconvert.com/v2/jobs',
+				url: `${baseUrl}/v2/jobs`,
 				json: true,
 				body: {
 					tag: 'n8n',
@@ -79,16 +96,15 @@ export function getJobErrorMessage(job: Job): string {
 }
 
 export async function waitForJob(this: IExecuteFunctions, id: string): Promise<Job> {
-	const credentialsType =
-		(this.getNodeParameter('authentication', 0) as string) === 'oAuth2'
-			? 'cloudConvertOAuth2Api'
-			: 'cloudConvertApi';
+	const authentication = this.getNodeParameter('authentication', 0) as string;
+	const credentialsType = authentication === 'oAuth2' ? 'cloudConvertOAuth2Api' : 'cloudConvertApi';
+	const { syncBaseUrl } = await getBaseUrls.call(this, authentication);
 	const waitResponseData = await this.helpers.httpRequestWithAuthentication.call(
 		this,
 		credentialsType,
 		{
 			method: 'GET',
-			url: `https://sync.api.cloudconvert.com/v2/jobs/${id}`,
+			url: `${syncBaseUrl}/v2/jobs/${id}`,
 		},
 	);
 
