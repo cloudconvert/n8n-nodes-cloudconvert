@@ -19,6 +19,11 @@ export interface Task {
 			[key: string]: string;
 		};
 		files?: TaskResultFile[];
+		// ai/agent tasks
+		output_tasks?: string[];
+		steps?: unknown[];
+		suggestions?: string[];
+		question?: boolean;
 	};
 }
 

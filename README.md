@@ -37,6 +37,7 @@ It supports these operations:
 - Merge multiple input files in one single PDF
 - Create archives (ZIP, RAR...) for multiple input files
 - Get file metadata (EXIF etc)
+- Describe in plain language what should happen with your files, and an AI agent takes care of it (beta)
 
 ## Credentials
 

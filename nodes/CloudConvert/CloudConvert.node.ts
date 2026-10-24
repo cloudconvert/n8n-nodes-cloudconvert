@@ -23,6 +23,8 @@ import { executePdfOperation } from './operations/pdf/execute';
 import { pdfFields } from './operations/pdf/fields';
 import { executeCommand } from './operations/command/execute';
 import { commandFields } from './operations/command/fields';
+import { executeAiAgent } from './operations/ai/execute';
+import { aiFields } from './operations/ai/fields';
 import { getBaseUrls } from './Utils';
 
 export class CloudConvert implements INodeType {
@@ -93,6 +95,10 @@ export class CloudConvert implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
+					{
+						name: 'AI',
+						value: 'ai',
+					},
 					{
 						name: 'Command',
 						value: 'command',
@@ -259,6 +265,30 @@ export class CloudConvert implements INodeType {
 				noDataExpression: true,
 			},
 			/**
+			 * AI Operations
+			 */
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['ai'],
+					},
+				},
+				options: [
+					{
+						name: 'AI Agent (Beta)',
+						value: 'ai/agent',
+						description:
+							'Describe in plain language what should be done with the input files, and an AI agent creates the required tasks',
+						action: 'Run AI agent',
+					},
+				],
+				default: 'ai/agent',
+				noDataExpression: true,
+			},
+			/**
 			 * Command Operations
 			 */
 			{
@@ -352,6 +382,7 @@ export class CloudConvert implements INodeType {
 							'pdf/split-pages',
 							'pdf/extract-pages',
 							'pdf/rotate-pages',
+							'ai/agent',
 						],
 					},
 				},
@@ -382,6 +413,7 @@ export class CloudConvert implements INodeType {
 							'pdf/split-pages',
 							'pdf/extract-pages',
 							'pdf/rotate-pages',
+							'ai/agent',
 						],
 						inputBinaryData: [false],
 					},
@@ -407,6 +439,7 @@ export class CloudConvert implements INodeType {
 							'metadata/write',
 							'watermark',
 							'command',
+							'ai/agent',
 						],
 						inputBinaryData: [false],
 					},
@@ -439,6 +472,7 @@ export class CloudConvert implements INodeType {
 							'pdf/split-pages',
 							'pdf/extract-pages',
 							'pdf/rotate-pages',
+							'ai/agent',
 						],
 						inputBinaryData: [true],
 					},
@@ -456,6 +490,7 @@ export class CloudConvert implements INodeType {
 			...watermarkFields,
 			...pdfFields,
 			...commandFields,
+			...aiFields,
 
 			/**
 			 * Metadata specific options
@@ -493,6 +528,7 @@ export class CloudConvert implements INodeType {
 							'watermark',
 							'capture-website',
 							'command',
+							'ai/agent',
 						],
 					},
 				},
@@ -560,6 +596,8 @@ export class CloudConvert implements INodeType {
 				return await executeCaptureWebsite.call(this);
 			} else if (operation === 'command') {
 				return await executeCommand.call(this);
+			} else if (operation === 'ai/agent') {
+				return await executeAiAgent.call(this);
 			} else if (
 				operation === 'pdf/a' ||
 				operation === 'pdf/ocr' ||
