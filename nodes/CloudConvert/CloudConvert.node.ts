@@ -6,7 +6,7 @@ import type {
 	INodeTypeDescription,
 	IExecuteFunctions,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import { thumbnailFields } from './operations/thumbnail/fields';
 import { executeThumbnail } from './operations/thumbnail/execute';
@@ -41,8 +41,8 @@ export class CloudConvert implements INodeType {
 		defaults: {
 			name: 'CloudConvert',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		usableAsTool: true,
 		/**
 		 * Auth
@@ -307,8 +307,7 @@ export class CloudConvert implements INodeType {
 				noDataExpression: true,
 			},
 			{
-				// eslint-disable-next-line n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options
-				displayName: 'Output Format',
+				displayName: 'Output Format Name or ID',
 				name: 'outputFormat',
 				type: 'options',
 				default: '',
@@ -323,8 +322,8 @@ export class CloudConvert implements INodeType {
 					loadOptionsMethod: 'loadOutputFormats',
 				},
 				placeholder: '',
-				// eslint-disable-next-line n8n-nodes-base/node-param-description-wrong-for-dynamic-options
-				description: 'Output format the file should be converted to',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
 			/**
 			 * Input file
@@ -581,10 +580,13 @@ export class CloudConvert implements INodeType {
 						json: {
 							error: error.message,
 						},
+						pairedItem: {
+							item: 0,
+						},
 					},
 				]);
 			}
-			throw error;
+			throw new NodeOperationError(this.getNode(), error as Error);
 		}
 	}
 }

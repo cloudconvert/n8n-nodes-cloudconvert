@@ -1,6 +1,5 @@
-import type { IExecuteFunctions, ILoadOptionsFunctions } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
-import type { Readable } from 'stream';
+import type { IExecuteFunctions, ILoadOptionsFunctions, JsonObject } from 'n8n-workflow';
+import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import type { CreateTasksPayload, Job, Task, TaskResultFile } from './Interfaces';
 
 const DEFAULT_BASE_URL = 'https://api.cloudconvert.com';
@@ -47,7 +46,7 @@ export async function createJob(this: IExecuteFunctions, tasks: CreateTasksPaylo
 				`${e.cause.response.data.message} (Code: ${e.cause.response.data.code})`,
 			);
 		}
-		throw e;
+		throw new NodeApiError(this.getNode(), e as JsonObject);
 	}
 	return createResponseData.data;
 }
@@ -122,7 +121,10 @@ export async function downloadOutputFile(this: IExecuteFunctions, exportUrl: Tas
 		url: exportUrl.url,
 		returnFullResponse: true,
 		encoding: 'stream',
-	})) as { body: Readable; headers: { [key: string]: string } };
+	})) as {
+		body: Parameters<IExecuteFunctions['helpers']['prepareBinaryData']>[0];
+		headers: { [key: string]: string };
+	};
 	return this.helpers.prepareBinaryData(
 		downloadResponse.body,
 		exportUrl.filename,
