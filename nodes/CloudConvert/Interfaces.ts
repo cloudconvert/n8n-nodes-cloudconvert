@@ -24,6 +24,8 @@ export interface Task {
 		steps?: unknown[];
 		suggestions?: string[];
 		question?: boolean;
+		// other operations, e.g. language and duration of ai/stt or the redactions of ai/redact
+		[key: string]: unknown;
 	};
 }
 

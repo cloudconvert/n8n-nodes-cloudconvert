@@ -25,6 +25,7 @@ import { executeCommand } from './operations/command/execute';
 import { commandFields } from './operations/command/fields';
 import { executeAiAgent } from './operations/ai/execute';
 import { aiFields } from './operations/ai/fields';
+import { executeAiTask } from './operations/ai/execute-task';
 import { getBaseUrls } from './Utils';
 
 export class CloudConvert implements INodeType {
@@ -284,6 +285,25 @@ export class CloudConvert implements INodeType {
 							'Describe in plain language what should be done with the input files, and an AI agent creates the required tasks',
 						action: 'Run AI agent',
 					},
+					{
+						name: 'Redact Personal Data (Beta)',
+						value: 'ai/redact',
+						description: 'Remove personal data (names, contact data, IDs...) from a PDF, TXT or MD file',
+						action: 'Redact personal data',
+					},
+					{
+						name: 'Speech to Text (Beta)',
+						value: 'ai/stt',
+						description:
+							'Transcribe the speech of an audio or video file to text, subtitles (SRT, VTT) or JSON',
+						action: 'Transcribe speech to text',
+					},
+					{
+						name: 'Text to Speech (Beta)',
+						value: 'ai/tts',
+						description: 'Speak a text to an MP3, WAV, FLAC or OGG audio file',
+						action: 'Convert text to speech',
+					},
 				],
 				default: 'ai/agent',
 				noDataExpression: true,
@@ -383,6 +403,8 @@ export class CloudConvert implements INodeType {
 							'pdf/extract-pages',
 							'pdf/rotate-pages',
 							'ai/agent',
+							'ai/stt',
+							'ai/redact',
 						],
 					},
 				},
@@ -414,6 +436,8 @@ export class CloudConvert implements INodeType {
 							'pdf/extract-pages',
 							'pdf/rotate-pages',
 							'ai/agent',
+							'ai/stt',
+							'ai/redact',
 						],
 						inputBinaryData: [false],
 					},
@@ -440,6 +464,8 @@ export class CloudConvert implements INodeType {
 							'watermark',
 							'command',
 							'ai/agent',
+							'ai/stt',
+							'ai/redact',
 						],
 						inputBinaryData: [false],
 					},
@@ -473,6 +499,8 @@ export class CloudConvert implements INodeType {
 							'pdf/extract-pages',
 							'pdf/rotate-pages',
 							'ai/agent',
+							'ai/stt',
+							'ai/redact',
 						],
 						inputBinaryData: [true],
 					},
@@ -529,6 +557,9 @@ export class CloudConvert implements INodeType {
 							'capture-website',
 							'command',
 							'ai/agent',
+							'ai/stt',
+							'ai/tts',
+							'ai/redact',
 						],
 					},
 				},
@@ -598,6 +629,8 @@ export class CloudConvert implements INodeType {
 				return await executeCommand.call(this);
 			} else if (operation === 'ai/agent') {
 				return await executeAiAgent.call(this);
+			} else if (operation === 'ai/stt' || operation === 'ai/tts' || operation === 'ai/redact') {
+				return await executeAiTask.call(this);
 			} else if (
 				operation === 'pdf/a' ||
 				operation === 'pdf/ocr' ||
