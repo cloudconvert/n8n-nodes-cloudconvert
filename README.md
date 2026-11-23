@@ -38,6 +38,9 @@ It supports these operations:
 - Create archives (ZIP, RAR...) for multiple input files
 - Get file metadata (EXIF etc)
 - Describe in plain language what should happen with your files, and an AI agent takes care of it (beta)
+- Transcribe the speech of audio and video files to text or subtitles (beta)
+- Speak a text to an audio file (beta)
+- Remove personal data from PDF, TXT and MD files (beta)
 
 ## Credentials
 
